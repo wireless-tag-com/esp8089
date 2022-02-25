@@ -1210,8 +1210,12 @@ static int esp_op_set_bitrate_mask(struct ieee80211_hw *hw,
 	return 0;
 }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 void esp_op_flush(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 		  u32 queues, bool drop)
+#else
+void esp_op_flush(struct ieee80211_hw *hw, u32 queues, bool drop)
+#endif
 {
 
 	ESP_IEEE80211_DBG(ESP_DBG_OP, "%s enter \n", __func__);
@@ -1236,16 +1240,26 @@ void esp_op_flush(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 	} while (0);
 }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 static int esp_op_ampdu_action(struct ieee80211_hw *hw,
 			       struct ieee80211_vif *vif,
 			       struct ieee80211_ampdu_params *params)
+#else
+static int esp_op_ampdu_action(struct ieee80211_hw *hw,
+                               struct ieee80211_vif *vif,
+                               enum ieee80211_ampdu_mlme_action action,
+                               struct ieee80211_sta *sta, u16 tid, u16 *ssn,
+                               u8 buf_size)
+#endif
 {
 	int ret = -EOPNOTSUPP;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 	enum ieee80211_ampdu_mlme_action action = params->action;
 	struct ieee80211_sta *sta = params->sta;
 	u16 tid = params->tid;
 	u16 *ssn = &params->ssn;
 	u8 buf_size = params->buf_size;
+#endif
 	struct esp_pub *epub = (struct esp_pub *) hw->priv;
 	struct esp_node *node = (struct esp_node *) sta->drv_priv;
 	struct esp_tx_tid *tid_info = &node->tid[tid];
@@ -1600,11 +1614,19 @@ static void esp_pub_init_mac80211(struct esp_pub *epub)
 
 	hw->max_listen_interval = 10;
 
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 4, 0))
+	hw->flags = IEEE80211_HW_SIGNAL_DBM | IEEE80211_HW_HAS_RATE_CONTROL |
+				IEEE80211_HW_MFP_CAPABLE |
+				IEEE80211_HW_SUPPORTS_PS |
+				IEEE80211_HW_AMPDU_AGGREGATION | IEEE80211_HW_HOST_BROADCAST_PS_BUFFERING;
+#else
 	ieee80211_hw_set(hw, SIGNAL_DBM);
 	ieee80211_hw_set(hw, HAS_RATE_CONTROL);
 	ieee80211_hw_set(hw, SUPPORTS_PS);
 	ieee80211_hw_set(hw, AMPDU_AGGREGATION);
 	ieee80211_hw_set(hw, HOST_BROADCAST_PS_BUFFERING);
+#endif
+
 	//IEEE80211_HW_PS_NULLFUNC_STACK |   
 	//IEEE80211_HW_CONNECTION_MONITOR |
 	//IEEE80211_HW_BEACON_FILTER |

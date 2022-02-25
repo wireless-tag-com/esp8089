@@ -26,6 +26,18 @@
 #include <linux/version.h>
 #include "sip2_common.h"
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0))
+#include <linux/nl80211.h>
+enum ieee80211_band {
+    IEEE80211_BAND_2GHZ = NL80211_BAND_2GHZ,
+    IEEE80211_BAND_5GHZ = NL80211_BAND_5GHZ,
+    IEEE80211_BAND_60GHZ = NL80211_BAND_60GHZ,
+
+    /* keep last */
+    IEEE80211_NUM_BANDS
+};
+#endif
+
 enum esp_sdio_state {
 	ESP_SDIO_STATE_FIRST_INIT,
 	ESP_SDIO_STATE_FIRST_NORMAL_EXIT,
@@ -95,7 +107,7 @@ typedef struct esp_wl {
 	atomic_t tkip_key_set;
 
 	/* so far only 2G band */
-	struct ieee80211_supported_band sbands[NUM_NL80211_BANDS];
+	struct ieee80211_supported_band sbands[IEEE80211_NUM_BANDS];
 
 	unsigned long flags;
 	atomic_t off;

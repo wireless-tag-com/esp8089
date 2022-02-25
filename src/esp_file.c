@@ -22,7 +22,10 @@
 #include <linux/firmware.h>
 #include <linux/netdevice.h>
 #include <linux/aio.h>
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 #include <linux/property.h>
+#endif
 
 #include "esp_file.h"
 #include "esp_debug.h"
@@ -184,12 +187,15 @@ int request_init_conf(struct device *dev)
 	char *attr, *str, *p;
 	int attr_len, str_len;
 	int ret = 0;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 	u32 val;
 
 	/* Check for any parameters passed through devicetree (or acpi) */
 	if (device_property_read_u32(dev, "esp,crystal-26M-en", &val) == 0)
 		set_init_config_attr("crystal_26M_en", strlen("crystal_26M_en"),
 				     val);
+#endif
 
 	/* parse optional parameter in the form of key1=value,key2=value,.. */
 	attr = NULL;
