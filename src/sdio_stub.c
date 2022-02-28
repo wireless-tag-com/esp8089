@@ -13,12 +13,16 @@ static int esp_reset_gpio = 13;
 module_param(esp_reset_gpio, int, 0);
 MODULE_PARM_DESC(esp_reset_gpio, "ESP8089 CH_PD reset GPIO number");
 
+#ifdef CONFIG_ARCH_INFINITY2M
 extern void ms_sdmmc_rescan(void);
+#endif
 
 void sif_platform_rescan_card(unsigned insert)
 {
+#ifdef CONFIG_ARCH_INFINITY2M
 	if (insert)
 		ms_sdmmc_rescan();
+#endif
 }
 
 void sif_platform_target_poweroff(void)
